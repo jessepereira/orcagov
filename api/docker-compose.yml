@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+
+  # Spring Boot Application
+  orcagov-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orcagov-api
+    restart: unless-stopped
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://172.17.0.1:5432/orcagov
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=Brasil@@2026
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SERVER_PORT=8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+
+
+networks:
+  default:
+    external: false  # Usando rede interna por padrão
