@@ -57,6 +57,10 @@ public class Pagamento {
     @Column(name = "data_criacao", updatable = false)
     private LocalDateTime dataCriacao;
 
+    @ManyToOne
+    @JoinColumn(name = "usuario_criador_id")
+    private Usuario usuarioCriador;
+
     @LastModifiedDate
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;

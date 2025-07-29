@@ -4,23 +4,32 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
-import org.antlr.v4.runtime.misc.NotNull;
-import org.hibernate.annotations.processing.Pattern;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
 
 @Entity
 @Table(name = "despesas")
@@ -30,8 +39,7 @@ public class Despesa {
     private Long id;
 
     @Column(name = "numero_protocolo", unique = true, nullable = false, updatable = false)
-    @Pattern(regexp = "\\d{5}\\.\\d{6}/\\d{4}-\\d{2}", 
-      message = "Número do protocolo deve seguir o formato: #####.######/####-##")
+    @Pattern(regexp = "\\d{5}\\.\\d{6}/\\d{4}-\\d{2}", message = "Número do protocolo inválido")
     private String numeroProtocolo;
 
 
@@ -68,6 +76,10 @@ public class Despesa {
     @OneToMany(mappedBy = "despesa", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Empenho> empenhos = new ArrayList<>();
+    
+    @ManyToOne
+    @JoinColumn(name = "usuario_criador_id")
+    private Usuario usuarioCriador;
 
     @CreatedDate
     @Column(name = "data_criacao", updatable = false)
@@ -175,4 +187,4 @@ public class Despesa {
         }
     }
 }
-}
+

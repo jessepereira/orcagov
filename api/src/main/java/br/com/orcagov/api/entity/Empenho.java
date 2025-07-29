@@ -60,6 +60,10 @@ public class Empenho {
     @JsonManagedReference
     private List<Pagamento> pagamentos = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "usuario_criador_id")
+    private Usuario usuarioCriador;
+
     @CreatedDate
     @Column(name = "data_criacao", updatable = false)
     private LocalDateTime dataCriacao;

@@ -1,8 +1,6 @@
 version: '3.8'
 
 services:
-
-  # Spring Boot Application
   orcagov-api:
     build:
       context: .
@@ -10,25 +8,16 @@ services:
     container_name: orcagov-api
     restart: unless-stopped
     environment:
-      #- SPRING_PROFILES_ACTIVE=docker
-      #- SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/orcagov
-      #- SPRING_DATASOURCE_USERNAME=postgres
-      #- SPRING_DATASOURCE_PASSWORD=Brasil@@2026
-      #- SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      #- SPRING_JPA_SHOW_SQL=true
-      #- SERVER_PORT=8080
       - JWT_SECRET=ae19b8f7cbb744f0a45e90f21e0d4fbd7e35d452e0a18e3f782b3eac4a7d114c
       - JWT_EXPIRATION=604800000
     ports:
       - "8081:8080"
     volumes:
-      - ./src:/app/src       # volume com seu código-fonte
-      - ./logs:/app/logs     # logs
-      - ./.mvn:/app/.mvn     # necessário para o wrapper funcionar
-      - ./pom.xml:/app/pom.xml
-      - ./mvnw:/app/mvnw
-  
- 
+      - ./src:/app/src
+      - ./logs:/app/logs
+      - .:/app   # Monta tudo, incluindo pom.xml e mvnw
+
 networks:
   default:
-    external: false  # Usando rede interna por padrão
+    external: false
+

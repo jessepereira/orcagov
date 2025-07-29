@@ -1,12 +1,10 @@
 package br.com.orcagov.api.entity;
 
+import java.util.List;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,12 +12,29 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
+import br.com.orcagov.api.entity.enums.TipoUsuario;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+
+
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuario")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,7 +48,7 @@ public class Usuario implements UserDetails {
     @NotBlank(message = "Nome de usuário é obrigatório")
     @Column(unique = true, nullable = false)
     private String userName;
-
+    
     @NotBlank(message = "Senha é obrigatória")
     @Column(nullable = false)
     private String password;
@@ -46,6 +61,15 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoUsuario tipoUser = TipoUsuario.USER;
+    
+    @OneToMany(mappedBy = "usuarioCriador", cascade = CascadeType.ALL)
+    private List<Despesa> despesasCriadas;
+    
+    @OneToMany(mappedBy = "usuarioCriador", cascade = CascadeType.ALL)
+    private List<Empenho> empenhosCriados;
+
+    @OneToMany(mappedBy = "usuarioCriador", cascade = CascadeType.ALL)
+    private List<Pagamento> pagamentosCriados;
 
     @Column(nullable = false)
     private Boolean ativo = true;
@@ -89,7 +113,5 @@ public class Usuario implements UserDetails {
         return ativo;
     }
 
-    public enum TipoUsuario {
-        ADMIN, USER
-    }
+    
 }
