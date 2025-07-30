@@ -23,6 +23,8 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import br.com.orcagov.api.entity.enums.TipoDespesa;
+import br.com.orcagov.api.entity.enums.StatusDespesa;
 
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -125,7 +127,7 @@ public class Despesa {
         return getValorTotalEmpenhado().compareTo(valorDespesas) <= 0;
     }
 
-    private StatusDespesa calculateStatus() {
+    public StatusDespesa calculateStatus() {
         if (empenhos.isEmpty()) {
             return StatusDespesa.AGUARDANDO_EMPENHO;
         }
@@ -152,38 +154,106 @@ public class Despesa {
         return StatusDespesa.AGUARDANDO_EMPENHO;
     }
 
-    public enum TipoDespesa {
-        OBRA_DE_EDIFICACAO("Obra de Edificação"),
-        OBRA_DE_RODOVIAS("Obra de Rodovias"),
-        OUTROS("Outros");
 
-        private final String descricao;
+    public Long getId() {
+    return id;
+}
 
-        TipoDespesa(String descricao) {
-            this.descricao = descricao;
-        }
+public void setId(Long id) {
+    this.id = id;
+}
 
-        public String getDescricao() {
-            return descricao;
-        }
-    }
+public String getNumeroProtocolo() {
+    return numeroProtocolo;
+}
 
-    public enum StatusDespesa {
-        AGUARDANDO_EMPENHO("Aguardando Empenho"),
-        PARCIALMENTE_EMPENHADA("Parcialmente Empenhada"),
-        AGUARDANDO_PAGAMENTO("Aguardando Pagamento"),
-        PARCIALMENTE_PAGA("Parcialmente Paga"),
-        PAGA("Paga");
+public void setNumeroProtocolo(String numeroProtocolo) {
+    this.numeroProtocolo = numeroProtocolo;
+}
 
-        private final String descricao;
+public TipoDespesa getTipoDespesa() {
+    return tipoDespesa;
+}
 
-        StatusDespesa(String descricao) {
-            this.descricao = descricao;
-        }
+public void setTipoDespesa(TipoDespesa tipoDespesa) {
+    this.tipoDespesa = tipoDespesa;
+}
 
-        public String getDescricao() {
-            return descricao;
-        }
-    }
+public LocalDateTime getDataProtocolo() {
+    return dataProtocolo;
+}
+
+public void setDataProtocolo(LocalDateTime dataProtocolo) {
+    this.dataProtocolo = dataProtocolo;
+}
+
+public LocalDate getDataVencimento() {
+    return dataVencimento;
+}
+
+public void setDataVencimento(LocalDate dataVencimento) {
+    this.dataVencimento = dataVencimento;
+}
+
+public String getCredorDespesas() {
+    return credorDespesas;
+}
+
+public void setCredorDespesas(String credorDespesas) {
+    this.credorDespesas = credorDespesas;
+}
+
+public String getDescricaoDespesas() {
+    return descricaoDespesas;
+}
+
+public void setDescricaoDespesas(String descricaoDespesas) {
+    this.descricaoDespesas = descricaoDespesas;
+}
+
+public BigDecimal getValorDespesas() {
+    return valorDespesas;
+}
+
+public void setValorDespesas(BigDecimal valorDespesas) {
+    this.valorDespesas = valorDespesas;
+}
+
+public void setStatus(StatusDespesa status) {
+    this.status = status;
+}
+
+public List<Empenho> getEmpenhos() {
+    return empenhos;
+}
+
+public void setEmpenhos(List<Empenho> empenhos) {
+    this.empenhos = empenhos;
+}
+
+public Usuario getUsuarioCriador() {
+    return usuarioCriador;
+}
+
+public void setUsuarioCriador(Usuario usuarioCriador) {
+    this.usuarioCriador = usuarioCriador;
+}
+
+public LocalDateTime getDataCriacao() {
+    return dataCriacao;
+}
+
+public void setDataCriacao(LocalDateTime dataCriacao) {
+    this.dataCriacao = dataCriacao;
+}
+
+public LocalDateTime getDataAtualizacao() {
+    return dataAtualizacao;
+}
+
+public void setDataAtualizacao(LocalDateTime dataAtualizacao) {
+    this.dataAtualizacao = dataAtualizacao;
+}
+
 }
 
