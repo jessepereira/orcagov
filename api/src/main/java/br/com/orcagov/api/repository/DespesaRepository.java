@@ -80,4 +80,9 @@ public interface DespesaRepository extends JpaRepository<Despesa, Long> {
             @Param("credor") String credor,
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim);
+
+        // Contar número de protocolos em um ano específico
+    @Query("SELECT COUNT(d) FROM Despesa d WHERE d.numeroProtocolo LIKE CONCAT('%/', :ano, '%')")
+    Long contarProtocolosPorAno(@Param("ano") String ano);
 }
+
