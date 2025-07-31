@@ -41,26 +41,13 @@ Este projeto foi desenvolvido utilizando as seguintes tecnologias:
 
 ### Subir o container do banco de dados
 
-Rode o comando abaixo para iniciar o container do banco de dados PostgreSQL:
+1- Primeiro, clone o repositório para sua máquina local:
+git clone https://github.com/jessepereira/orcagov.git
 
-```bash
-docker-compose up
-```
+2- Entre na pasta orcago verifique se o docker-compose.yml do postgres estar lá e execute 
+docker-compose up, banco de dados será configurado automaticamente com a variável de ambiente `POSTGRES_DB=orcagov` na criação do container.
 
-O banco de dados será configurado automaticamente com a variável de ambiente `POSTGRES_DB=orcagov` na criação do container.
-
----
-
-### Subir o container do back-end
-
-Após o banco de dados estar rodando, vá até o diretório `api` e inicie o container do back-end:
-
-```bash
-cd api
-docker-compose up
-```
-
----
+3 cd api,verifique se o docker-compose.yml estar lá e execute docker-compose up 
 
 ### Explicação do Processo
 
