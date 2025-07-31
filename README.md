@@ -44,7 +44,7 @@ Este projeto foi desenvolvido utilizando as seguintes tecnologias:
 1- Primeiro, clone o repositório para sua máquina local:
 git clone https://github.com/jessepereira/orcagov.git
 
-2- Entre na pasta orcago verifique se o docker-compose.yml do postgres estar lá e execute 
+2- Entre na pasta orcagov verifique se o docker-compose.yml do postgres estar lá e execute 
 docker-compose up, banco de dados será configurado automaticamente com a variável de ambiente `POSTGRES_DB=orcagov` na criação do container.
 
 3 cd api,verifique se o docker-compose.yml estar lá e execute docker-compose up 
