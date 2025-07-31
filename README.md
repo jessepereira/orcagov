@@ -51,13 +51,12 @@ docker-compose up, banco de dados será configurado automaticamente com a variá
 
 ### Explicação do Processo
 
-- Dois containers Docker foram escolhidos para garantir que o banco de dados suba primeiro.  
+- Execuatr o projeto em dois containers Docker foram escolhidos para garantir que o banco de dados suba primeiro.  
   Isso reduz os riscos de a aplicação travar com algum erro relacionado ao banco de dados.
 - O container do banco deve ser iniciado primeiro.
-- O container do back-end Java foi configurado para aguardar a conclusão do banco,  
-  mas ao separá-los em dois `docker-compose`, minimiza-se o risco de falhas no processo.
+- O container do back-end Java é para ser inciado depois.
 - Este ambiente é totalmente voltado para **desenvolvimento**.  
-  **Não é recomendado para produção**, pois ele não inclui configurações como balanceamento de carga, segurança ou escalabilidade.
+  **Não é recomendado para produção**, pois ele não inclui uma serie de configurações destinada ao deploy em produção.
 
 ---
 
