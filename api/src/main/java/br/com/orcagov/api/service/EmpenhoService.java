@@ -13,7 +13,7 @@ import br.com.orcagov.api.repository.EmpenhoRepository;
 import br.com.orcagov.api.repository.UsuarioRepository;
 import br.com.orcagov.api.exception.BusinessException;
 import br.com.orcagov.api.exception.ResourceNotFoundException;
-import br.com.orcagov.api.exception.DuplicateResourceException;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Year;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +39,9 @@ public class EmpenhoService {
     
     @Autowired
     private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private SequenceGeneratorService sequenceGeneratorService;
 
     // ==========================================
     // MÉTODOS CRUD PRINCIPAIS
@@ -60,7 +62,7 @@ public class EmpenhoService {
         
         // Criar entidade Empenho
         Empenho empenho = new Empenho();
-        empenho.setNumeroEmpenho(gerarNumeroEmpenho());
+        empenho.setNumeroEmpenho(sequenceGeneratorService.gerarNumeroEmpenho());
         empenho.setDataEmpenho(request.getDataEmpenho());
         empenho.setValor(request.getValor());
         empenho.setObservacao(request.getObservacao());
@@ -339,17 +341,6 @@ public class EmpenhoService {
         despesaRepository.save(despesa);
     }
 
-    /**
-     * Gerar número do empenho no formato: 2025NE0001
-     */
-    private String gerarNumeroEmpenho() {
-        String anoAtual = String.valueOf(Year.now().getValue());
-        Long count = empenhoRepository.contarEmpenhosPorAno(anoAtual);
-        long proximoSequencial = (count != null ? count : 0) + 1;
-        
-        return String.format("%sNE%04d", anoAtual, proximoSequencial);
-    }
-
     // ==========================================
     // MÉTODOS ESPECÍFICOS DO CONTROLLER
     // ==========================================
@@ -365,7 +356,7 @@ public class EmpenhoService {
     }
 
     public String obterProximoNumero() {
-        return gerarNumeroEmpenho();
+        return sequenceGeneratorService.gerarNumeroEmpenho();
     }
 
     public boolean verificarNumeroExiste(String numeroEmpenho) {
@@ -428,4 +419,195 @@ public class EmpenhoService {
                         .id(pagamento.getId())
                         .numeroPagamento(pagamento.getNumeroPagamento())
                         .dataPagamento(pagamento.getDataPagamento())
-                        .valor
+                        .valorPagamento(pagamento.getValorPagamento())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // ==========================================
+    // MÉTODOS PARA RELATÓRIOS E ESTATÍSTICAS
+    // ==========================================
+
+    /**
+     * Obter estatísticas gerais dos empenhos
+     */
+    @Transactional(readOnly = true)
+    public EmpenhoEstatisticasDTO obterEstatisticas() {
+        List<Empenho> todosEmpenhos = empenhoRepository.findAll();
+        
+        BigDecimal valorTotal = todosEmpenhos.stream()
+                .map(Empenho::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        BigDecimal valorPago = todosEmpenhos.stream()
+                .map(Empenho::getValorTotalPago)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        long empenhosSemPagamentos = todosEmpenhos.stream()
+                .filter(e -> e.getPagamentos().isEmpty())
+                .count();
+        
+        return EmpenhoEstatisticasDTO.builder()
+                .totalEmpenhos((long) todosEmpenhos.size())
+                .valorTotalEmpenhado(valorTotal)
+                .valorTotalPago(valorPago)
+                .valorRestante(valorTotal.subtract(valorPago))
+                .empenhosSemPagamentos(empenhosSemPagamentos)
+                .build();
+    }
+
+    /**
+     * Relatório mensal de empenhos
+     */
+    @Transactional(readOnly = true)
+    public List<RelatorioMensalDTO> obterRelatorioMensal() {
+        List<Object[]> resultados = empenhoRepository.totalEmpenhadoPorMes();
+        
+        return resultados.stream()
+                .map(resultado -> RelatorioMensalDTO.builder()
+                        .ano(((Number) resultado[0]).intValue())
+                        .mes(((Number) resultado[1]).intValue())
+                        .valorTotal((BigDecimal) resultado[2])
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    // ==========================================
+    // DTOs PARA ESTATÍSTICAS E RELATÓRIOS
+    // ==========================================
+
+    public static class EmpenhoEstatisticasDTO {
+        private Long totalEmpenhos;
+        private BigDecimal valorTotalEmpenhado;
+        private BigDecimal valorTotalPago;
+        private BigDecimal valorRestante;
+        private Long empenhosSemPagamentos;
+        
+        public static EmpenhoEstatisticasDTOBuilder builder() {
+            return new EmpenhoEstatisticasDTOBuilder();
+        }
+        
+        public static class EmpenhoEstatisticasDTOBuilder {
+            private EmpenhoEstatisticasDTO dto = new EmpenhoEstatisticasDTO();
+            
+            public EmpenhoEstatisticasDTOBuilder totalEmpenhos(Long total) {
+                dto.totalEmpenhos = total;
+                return this;
+            }
+            
+            public EmpenhoEstatisticasDTOBuilder valorTotalEmpenhado(BigDecimal valor) {
+                dto.valorTotalEmpenhado = valor;
+                return this;
+            }
+            
+            public EmpenhoEstatisticasDTOBuilder valorTotalPago(BigDecimal valor) {
+                dto.valorTotalPago = valor;
+                return this;
+            }
+            
+            public EmpenhoEstatisticasDTOBuilder valorRestante(BigDecimal valor) {
+                dto.valorRestante = valor;
+                return this;
+            }
+            
+            public EmpenhoEstatisticasDTOBuilder empenhosSemPagamentos(Long count) {
+                dto.empenhosSemPagamentos = count;
+                return this;
+            }
+            
+            public EmpenhoEstatisticasDTO build() {
+                return dto;
+            }
+        }
+        
+        // Getters
+        public Long getTotalEmpenhos() { return totalEmpenhos; }
+        public BigDecimal getValorTotalEmpenhado() { return valorTotalEmpenhado; }
+        public BigDecimal getValorTotalPago() { return valorTotalPago; }
+        public BigDecimal getValorRestante() { return valorRestante; }
+        public Long getEmpenhosSemPagamentos() { return empenhosSemPagamentos; }
+    }
+
+    public static class RelatorioMensalDTO {
+        private Integer ano;
+        private Integer mes;
+        private BigDecimal valorTotal;
+        
+        public static RelatorioMensalDTOBuilder builder() {
+            return new RelatorioMensalDTOBuilder();
+        }
+        
+        public static class RelatorioMensalDTOBuilder {
+            private RelatorioMensalDTO dto = new RelatorioMensalDTO();
+            
+            public RelatorioMensalDTOBuilder ano(Integer ano) {
+                dto.ano = ano;
+                return this;
+            }
+            
+            public RelatorioMensalDTOBuilder mes(Integer mes) {
+                dto.mes = mes;
+                return this;
+            }
+            
+            public RelatorioMensalDTOBuilder valorTotal(BigDecimal valor) {
+                dto.valorTotal = valor;
+                return this;
+            }
+            
+            public RelatorioMensalDTO build() {
+                return dto;
+            }
+        }
+        
+        // Getters
+        public Integer getAno() { return ano; }
+        public Integer getMes() { return mes; }
+        public BigDecimal getValorTotal() { return valorTotal; }
+    }
+
+    public static class ValidacaoValorDTO {
+        private Boolean valido;
+        private BigDecimal valorDisponivel;
+        private BigDecimal valorSolicitado;
+        private String mensagem;
+        
+        public static ValidacaoValorDTOBuilder builder() {
+            return new ValidacaoValorDTOBuilder();
+        }
+        
+        public static class ValidacaoValorDTOBuilder {
+            private ValidacaoValorDTO dto = new ValidacaoValorDTO();
+            
+            public ValidacaoValorDTOBuilder valido(Boolean valido) {
+                dto.valido = valido;
+                return this;
+            }
+            
+            public ValidacaoValorDTOBuilder valorDisponivel(BigDecimal valor) {
+                dto.valorDisponivel = valor;
+                return this;
+            }
+            
+            public ValidacaoValorDTOBuilder valorSolicitado(BigDecimal valor) {
+                dto.valorSolicitado = valor;
+                return this;
+            }
+            
+            public ValidacaoValorDTOBuilder mensagem(String mensagem) {
+                dto.mensagem = mensagem;
+                return this;
+            }
+            
+            public ValidacaoValorDTO build() {
+                return dto;
+            }
+        }
+        
+        // Getters
+        public Boolean getValido() { return valido; }
+        public BigDecimal getValorDisponivel() { return valorDisponivel; }
+        public BigDecimal getValorSolicitado() { return valorSolicitado; }
+        public String getMensagem() { return mensagem; }
+    }
+}
