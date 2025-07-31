@@ -39,7 +39,58 @@ Este projeto foi desenvolvido utilizando as seguintes tecnologias:
 
 ### Passos para Instalar e Executar
 
-1. **Clone o repositório**:
-   ```bash
-   git clone https://github.com/jessepereira/orcagov.git
-   cd orcagov
+### Subir o container do banco de dados
+
+Rode o comando abaixo para iniciar o container do banco de dados PostgreSQL:
+
+```bash
+docker-compose up
+```
+
+O banco de dados será configurado automaticamente com a variável de ambiente `POSTGRES_DB=orcagov` na criação do container.
+
+---
+
+### Subir o container do back-end
+
+Após o banco de dados estar rodando, vá até o diretório `api` e inicie o container do back-end:
+
+```bash
+cd api
+docker-compose up
+```
+
+---
+
+### Explicação do Processo
+
+- Dois containers Docker foram escolhidos para garantir que o banco de dados suba primeiro.  
+  Isso reduz os riscos de a aplicação travar com algum erro relacionado ao banco de dados.
+- O container do banco deve ser iniciado primeiro.
+- O container do back-end Java foi configurado para aguardar a conclusão do banco,  
+  mas ao separá-los em dois `docker-compose`, minimiza-se o risco de falhas no processo.
+- Este ambiente é totalmente voltado para **desenvolvimento**.  
+  **Não é recomendado para produção**, pois ele não inclui configurações como balanceamento de carga, segurança ou escalabilidade.
+
+---
+
+### Acessar a aplicação
+
+Quando o container estiver rodando, você pode acessar a aplicação no seguinte endereço:
+
+```text
+http://localhost:8081
+```
+
+Use as credenciais abaixo para login:
+
+- **Usuário:** `admin`  
+- **Senha:** `admin123`
+
+---
+
+### Observações
+
+- Esse ambiente é somente para desenvolvimento. **Não é recomendado para uso em produção**.
+- A escolha de separar os containers foi feita para garantir que o banco de dados inicie corretamente antes do back-end.
+- Caso o banco ou back-end não subam corretamente, verifique os logs do Docker e as configurações dos containers.
